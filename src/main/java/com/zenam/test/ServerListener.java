@@ -20,26 +20,33 @@ public class ServerListener {
             try {
                 serverSocket = new ServerSocket(13007);
                 System.out.println("connected on 13007");
-                try {
-                    clientSocket = serverSocket.accept();
-                    InputStream stream = clientSocket.getInputStream();
-                    System.out.println("connection: " + clientSocket.getInetAddress().getHostAddress() +" size: " + stream.available());
-                    byte[] buffer = new byte[1024];
-                    int bytesRead;
-                    while ((bytesRead = stream.read(buffer)) != -1) {
-                        System.out.println("in");
-                        String data = new String(buffer, 0, bytesRead);
-                        System.out.println(data);
+                while(true){
+                    try {
+                        clientSocket = serverSocket.accept();
+                        System.out.println("connection: " + clientSocket.getInetAddress().getHostAddress());
+                        DataInputStream in = new DataInputStream(new BufferedInputStream(clientSocket.getInputStream()));
+                        String line ="";
+                        while(!line.equals("F3|END_OF_RECORDS")){
+                            try{
+                                line = in.readUTF();
+                                System.out.println(line);
+                            }
+                            catch (Exception e){
+                                System.out.println(e);
+                                break;
+                            }
+                        }
+                        System.out.println("connection closing...");
+                        clientSocket.close();
+                        in.close();
+                    }
+                    catch (Exception e){
+                        e.printStackTrace();
                     }
                 }
-                catch (Exception e){
-                    e.printStackTrace();
-                }
-
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
-
         }).start();
     }
 
